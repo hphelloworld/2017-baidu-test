@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>有趣的鼠标悬浮模糊效果</title>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	<link rel="stylesheet" type="text/css" href="../common/css/reset.css">
+</head>
+<style>
+	.content{
+		position: relative;
+		margin: 20px auto;
+		text-align: center;
+		width: 380px;
+		height: 190px;
+		padding: 50px 0;
+	}
+	.content:hover:before,.content:hover:after{
+		-webkit-transform: scale(1,1);
+		-ms-transform: scale(1,1);
+		-o-transform: scale(1,1);
+		transform: scale(1,1);
+		opacity: 1;
+		visibility: visible;
+	}
+	.content:hover img{
+		-webkit-filter: blur(5px);
+		-o-filter: blur(5px);
+		filter: blur(5px);
+	}
+	.content:hover p{
+		animation: color_change 2s ease-in-out;
+		opacity: 1;
+		visibility: visible;
+	}
+	@keyframes color_change {
+		0%{color: #7AFF7F;}
+		50%{color:#3821FA;}
+		100%{color:#7AFF7F;}
+	}
+	.content:hover h4{
+		animation: streamer 5s  infinite linear;
+		opacity: 1;
+		visibility: visible;
+	}
+	@keyframes streamer {
+		0%{background-position: 0 0}
+		100%{background-position: -100% 0}
+	}
+	.content:before{
+		content: '';
+		position: absolute;
+		width: 300px;
+		left: 40px;
+		top: 20px;
+		bottom: 20px;
+		border-top: 4px solid #fff;
+		border-bottom: 4px solid #fff;
+		-webkit-transition: all 0.5s;
+		-o-transition: all 0.5s;
+		transition: all 0.5s;
+		-webkit-transform: scale(0,1);
+		-ms-transform: scale(0,1);
+		-o-transform: scale(0,1);
+		transform: scale(0,1);
+		opacity: 0;
+		visibility: hidden;
+	}
+	.content:after{
+		content: '';
+		position: absolute;
+		width: 296px;
+		left: 40px;
+		top: 20px;
+		bottom: 20px;
+		border-left: 2px solid #fff;
+		border-right: 2px solid #fff;
+		-webkit-transition: all 0.5s;
+		-o-transition: all 0.5s;
+		transition: all 0.5s;
+		-webkit-transform: scale(1,0);
+		-ms-transform: scale(1,0);
+		-o-transform: scale(1,0);
+		transform: scale(1,0);
+		opacity: 0;
+		visibility: hidden;
+	}
+	.content img{
+		position: absolute;
+		max-width: 100%;
+		height: auto;
+		left: 0;
+		top: 0;
+		z-index: -1;
+		-webkit-transition: all 0.5s;
+		-o-transition: all 0.5s;
+		transition: all 0.5s;
+	}
+	.content h4{
+		font-size: 20px;
+		background-image: -webkit-linear-gradient(left,#9582FF,#5EFFE0 20%,#9582FF 40%,#5EFFE0 50%,#9582FF 60%,#5EFFE0 80%,#9582FF);
+	    color: transparent;
+	    -webkit-background-clip: text;
+        background-size: 200%;
+		margin: 0;
+		opacity: 0;
+		visibility: hidden;
+	}
+	.content p{
+		font-size: 16px;
+		font-weight: bold;
+		color: #7AFF7F;
+		opacity: 0;
+		visibility: hidden;
+	}
+</style>
+<body>
+	<div class="content">
+		<img src="pic.jpeg">
+		<h4>欢迎参加百度前端技术学院</h4>
+		<p>点击开始</p>
+	</div>
+</body>
+</html>
