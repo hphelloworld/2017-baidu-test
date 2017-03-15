@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <link href="../common/css/reset.css" rel="stylesheet" />
+    <style type="text/css">
+        body {
+            font-family: "Microsoft Yahei", sans-serif;
+        }
+        
+        .clearfix:before {
+            content: "";
+            display: table;
+        }
+        
+        .clearfix:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+        
+        .pull-left {
+            float: left;
+        }
+        
+        .pull-right {
+            float: right;
+        }
+        
+        .wrapper {
+            padding: 20px;
+        }
+        
+        .left_content {
+            position: relative;
+            border: 1px solid #000;
+        }
+        
+        .left_content .color_div {
+            width: 200px;
+            height: 200px;
+            /*background-image: url("img/bg.png");*/
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .left_content .select_color {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 1px solid #000;
+            top: 200px;
+            left: 200px;
+            z-index: 10;
+            margin: -5px;
+            cursor: pointer;
+        }
+        
+        .left_content .select_color:after {
+            content: "";
+            border: 1px solid #fff;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        .center_content {
+            margin: 0px 20px;
+            border: 1px solid #000;
+            position: relative;
+        }
+        
+        .hue_bar {
+            width: 30px;
+            height: 200px;
+            background: url("img/hue.png");
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .hue_select {
+            position: absolute;
+            height: 10px;
+            width: 50px;
+            background: url("img/arrow-l.gif") left center no-repeat, url("img/arrow-r.gif") right center no-repeat;
+            left: -10px;
+            top: 0px;
+            margin-top: -4px;
+            cursor: pointer;
+        }
+        
+        .input_div label {
+            display: block;
+            height: 25px;
+            line-height: 25px;
+            font-size: 16px;
+            color: #666;
+            margin: 0 0 8px 0;
+        }
+        
+        .input_div:first-child {
+            margin-bottom: 20px;
+        }
+        
+        .input_div label input,
+        .set_input {
+            display: inline-block;
+            outline: none;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            color: #444;
+            width: 100px;
+            padding: 0 10px;
+            height: 25px;
+            line-height: 23px;
+        }
+        
+        .set_input.error {
+            border: 1px solid #f00e0e;
+        }
+        
+        .input_div label span {
+            display: inline-block;
+            width: 30px;
+            text-align: center;
+        }
+        
+        .get_div {
+            padding: 0 20px;
+        }
+        
+        .get_div span {
+            display: inline-block;
+            width: 80px;
+            height: 28px;
+            border: 1px solid #000;
+            vertical-align: middle;
+        }
+        
+        .get_div a {
+            display: inline-block;
+            text-align: center;
+            line-height: 28px;
+            height: 30px;
+            padding: 0 10px;
+            text-decoration: none;
+            border: 1px solid #eee;
+            color: #666;
+            font-size: 14px;
+            margin-left: 20px;
+        }
+        
+        .set_div {
+            padding: 20px 0 0 20px;
+            color: #666;
+        }
+    </style>
+    <title>颜色选择器</title>
+    <script src="../common/js/vue.min.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <div class="set_div">
+            请输入十六进制格式的颜色值: # <input type="text" :value="hex()" @input="set_color($event.target)" class="set_input" :class="{error: hex_error}">
+        </div>
+        <section class="wrapper clearfix">
+            <div class="left_content pull-left">
+                <div class="color_div" :style="color_div_bg()" @mousedown="select_mousedown($event)" @mousemove="select_mousemove($event)"
+                    @mouseup="select_mouseup($event)">
+                    <img src="img/bg.png" alt="" width="200" height="200">
+                    <span class="select_color" :style="select_posistion()" @mousedown.stop="return false" @mousemove.stop="return false"></span></div>
+            </div>
+            <div class="center_content pull-left">
+                <div class="hue_bar" @mousedown="hue_mousedown($event)" @mousemove="hue_mousemove($event)" @mouseup="hue_mouseup($event)"><span class="hue_select" :style="hue_posistion()" @mousedown.stop="return false" @mousemove.stop="return false"></span></div>
+            </div>
+            <div class="right_content pull-left">
+                <div class="input_div">
+                    <label> <span>R </span><input type="text" :value="rgb_r" data-value="rgb_r" @input="input_val(255,$event.target)"></label>
+                    <label> <span>G </span><input type="text" :value="rgb_g" data-value="rgb_g" @input="input_val(255,$event.target)"></label>
+                    <label> <span>B </span><input type="text" :value="rgb_b" data-value="rgb_b" @input="input_val(255,$event.target)"></label>
+                </div>
+                <div class="input_div">
+                    <label> <span>H </span><input type="text" :value="hsl_h" data-value="hsl_h" @input="input_val(100,$event.target)"> %</label>
+                    <label> <span>S </span><input type="text" :value="hsl_s" data-value="hsl_s" @input="input_val(100,$event.target)"> %</label>
+                    <label> <span>L </span><input type="text" :value="hsl_l" data-value="hsl_l" @input="input_val(100,$event.target)"> %</label>
+                </div>
+            </div>
+        </section>
+        <div class="get_div">
+            <span :style="color()"></span>
+            <a href="javascript:;" @click="get_color()">get color</a>
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+    var vm = new Vue({
+        el: "#app",
+        data: {
+            select_down: false,
+            hue_down: false,
+            hex_error: false,
+            hsb_h: 0,
+            hsb_s: 0,
+            hsb_b: 0,
+            hsl_h: 0,
+            hsl_s: 0,
+            hsl_l: 0,
+            rgb_r: 0,
+            rgb_g: 0,
+            rgb_b: 0
+        },
+        mounted: function () {
+            document.documentElement.addEventListener('mouseup', function () {
+                vm.select_down = false;
+                vm.hue_down = false;
+            }, false);
+        },
+        methods: {
+            // 计算小光圈的位置
+            select_posistion: function () {
+                return {
+                    top: 200 - this.hsb_b * 2 + 'px',
+                    left: this.hsb_s * 2 + 'px'
+                }
+            },
+            // 计算色谱滑块的位置
+            hue_posistion: function () {
+                return {
+                    top: this.hsb_h * 2 + 'px'
+                }
+            },
+            hex: function () {
+                var _hex = this.rgb_hex(this.rgb_r, this.rgb_g, this.rgb_b);
+                return _hex.replace("#", "");
+            },
+            // 左侧色域背景颜色
+            color_div_bg: function () {
+                var rgb = this.hsl_rgb(this.hsb_h, 100, 50);
+                return {
+                    backgroundColor: 'rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')'
+                }
+            },
+            // 选中的最终颜色显示
+            color: function () {
+                return {
+                    backgroundColor: 'rgb(' + this.rgb_r + ',' + this.rgb_g + ',' + this.rgb_b + ')'
+                }
+            },
+            // 获取选中的颜色
+            get_color: function () {
+                var color = {};
+                color.hex = this.rgb_hex(this.rgb_r, this.rgb_g, this.rgb_b);
+                color.rgb = "rgb" + "(" + this.rgb_r + "," + this.rgb_g + "," + this.rgb_b + ")";
+                color.hsl = "hsl" + "(" + this.hsl_h + "," + this.hsl_s + "," + this.hsl_l + ")";
+                console.log(color);
+            },
+            // 设置hex色值
+            set_color: function (el) {
+                // 16进制色值验证;
+                var reg = /^#([0-9a-fA-f]{6})$/;
+                var _val = "#" + el.value;
+                if (reg.test(_val)) {
+                    this.hex_error = false;
+                    var rgb = this.hex_rgb(_val);
+                    this.rgb_r = rgb[0];
+                    this.rgb_g = rgb[1];
+                    this.rgb_b = rgb[2];
+                    this.update_hsb();
+                    this.update_hsl();
+                } else {
+                    this.hex_error = true;
+                }
+            },
+            // 左侧色域鼠标按下事件
+            select_mousedown: function (e) {
+                var y = Math.min(200, e.offsetY);
+                var x = Math.min(200, e.offsetX);
+                this.hsb_s = parseInt(x / 2);
+                this.hsb_b = parseInt((200 - y) / 2);
+                this.select_down = true;
+                this.update_rgb();
+                this.update_hsl();
+            },
+            // 左侧色域鼠标按下移动事件
+            select_mousemove: function (e) {
+                if (this.select_down) {
+                    var y = Math.min(200, e.offsetY);
+                    var x = Math.min(200, e.offsetX);
+                    this.hsb_s = parseInt(x / 2);
+                    this.hsb_b = parseInt((200 - y) / 2);
+                    this.update_rgb();
+                    this.update_hsl();
+                }
+            },
+            // 左侧色域鼠标松开事件
+            select_mouseup: function (e) {
+                this.select_down = false;
+            },
+            // 色谱域鼠标按下事件
+            hue_mousedown: function (e) {
+                var y = Math.min(200, e.offsetY);
+                this.hsb_h = parseInt(y / 2);
+                this.hue_down = true;
+                this.update_rgb();
+                this.update_hsl();
+            },
+            // 色谱域鼠标移动事件
+            hue_mousemove: function (e) {
+                if (this.hue_down) {
+                    var y = Math.min(200, e.offsetY);
+                    this.hsb_h = parseInt(y / 2);
+                    this.update_rgb();
+                    this.update_hsl();
+                    this.hsl_h = this.hsb_h;
+                }
+            },
+            // 色谱域鼠标松开事件
+            hue_mouseup: function (e) {
+                this.hue_down = false;
+            },
+            // RGB和HSL的input事件
+            input_val: function (max, el) {
+                var _this = el;
+                var _val = parseInt(_this.value) ? parseInt(_this.value) : 0;
+                if (_val >= max) {
+                    _val = max;
+                };
+                _this.value = _val;
+                var s = _this.getAttribute('data-value');
+                this[s] = _val;
+                if (max == 100) {
+                    // 改变的为HSL值，更新RGB和HSB;
+                    this.update_hsl_rgb();
+                    this.update_hsb();
+                    this.hsb_h = this.hsl_h;
+                } else {
+                    // 改变的为RGB值，更新HSL和HSB;
+                    this.update_hsb();
+                    this.update_hsl();
+                }
+            },
+            // HSL改变时更新RGB;
+            update_hsl_rgb: function () {
+                var rgb = this.hsl_rgb(this.hsl_h, this.hsl_s, this.hsl_l);
+                this.rgb_r = rgb[0];
+                this.rgb_g = rgb[1];
+                this.rgb_b = rgb[2];
+            },
+            // HSB改变时更新RGB
+            update_rgb: function () {
+                var rgb = this.hsb_rgb(this.hsb_h, this.hsb_s, this.hsb_b);
+                this.rgb_r = rgb[0];
+                this.rgb_g = rgb[1];
+                this.rgb_b = rgb[2];
+                this.hex_error = false;
+            },
+            // RGB改变时更新HSB
+            update_hsb: function () {
+                var hsb = this.rgb_hsb(this.rgb_r, this.rgb_g, this.rgb_b);
+                this.hsb_h = hsb[0];
+                this.hsb_s = hsb[1];
+                this.hsb_b = hsb[2];
+                this.hex_error = false;
+            },
+            // RGB改变时更新HSL
+            update_hsl: function () {
+                var hsl = this.rgb_hsl(this.rgb_r, this.rgb_g, this.rgb_b);
+                this.hsl_h = hsl[0];
+                this.hsl_s = hsl[1];
+                this.hsl_l = hsl[2];
+            },
+            // RGB转HSL
+            rgb_hsl: function (r, g, b) {
+                r /= 255, g /= 255, b /= 255;
+                var max = Math.max(r, g, b),
+                    min = Math.min(r, g, b);
+                var h, s, l = (max + min) / 2;
+                if (max == min) {
+                    h = s = 0;
+                } else {
+                    var d = max - min;
+                    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                    switch (max) {
+                        case r:
+                            h = (g - b) / d + (g < b ? 6 : 0);
+                            break;
+                        case g:
+                            h = (b - r) / d + 2;
+                            break;
+                        case b:
+                            h = (r - g) / d + 4;
+                            break;
+                    }
+                    h /= 6;
+                }
+                return [Math.round(h * 100), Math.round(s * 100), Math.round(l * 100)];
+            },
+            // HSL转RGB
+            hsl_rgb: function (h, s, l) {
+                h /= 100, s /= 100, l /= 100;
+                var r, g, b;
+                if (s == 0) {
+                    r = g = b = l;
+                } else {
+                    var hue2rgb = function hue2rgb(p, q, t) {
+                        if (t < 0) t += 1;
+                        if (t > 1) t -= 1;
+                        if (t < 1 / 6) return p + (q - p) * 6 * t;
+                        if (t < 1 / 2) return q;
+                        if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+                        return p;
+                    }
+                    var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                    var p = 2 * l - q;
+                    r = hue2rgb(p, q, h + 1 / 3);
+                    g = hue2rgb(p, q, h);
+                    b = hue2rgb(p, q, h - 1 / 3);
+                }
+                return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+            },
+            // RGB转HSB
+            rgb_hsb: function (r, g, b) {
+                var min = Math.min(Math.min(r, g), b);
+                var max = Math.max(Math.max(r, g), b);
+                var H, S, B;
+                if (min == max) {
+                    H = 0;
+                } else if (max == r && g >= b) {
+                    H = ((g - b) / (max - min) / 6);
+                } else if (max == r && g < b) {
+                    H = ((g - b) / (max - min)) / 6 + 1 / 6;
+                } else if (max == g) {
+                    H = ((b - r) / (max - min)) / 6 + 1 / 3;
+                } else if (max == b) {
+                    H = ((r - g) / (max - min)) / 6 + 2 / 3;
+                }
+                if (max == 0) {
+                    S = 0;
+                } else {
+                    S = 1 - (min / max);
+                }
+                var _r = (r / 255);
+                var _g = (g / 255);
+                var _b = (b / 255);
+                B = Math.max(Math.max(_r, _g), _b);
+                H = (H >= 1) ? 0 : H;
+                return [Math.round(H * 100), Math.round(S * 100), Math.round(B * 100)];
+            },
+            // HSB转RGB
+            hsb_rgb: function (h, s, b) {
+                var R, G, B;
+                h = h / 100 * 360;
+                s /= 100;
+                b /= 100;
+                h = (h >= 360) ? 0 : h;
+                if (s == 0) {
+                    R = b * 255;
+                    G = b * 255;
+                    B = b * 255;
+                } else {
+                    i = Math.floor(h / 60) % 6;
+                    f = h / 60 - i;
+                    p = b * (1 - s);
+                    q = b * (1 - s * f);
+                    t = b * (1 - s * (1 - f));
+                    switch (i) {
+                        case 0:
+                            R = b;
+                            G = t;
+                            B = p;
+                            break;
+                        case 1:
+                            R = q;
+                            G = b;
+                            B = p;
+                            break;
+                        case 2:
+                            R = p;
+                            G = b;
+                            B = t;
+                            break;
+                        case 3:
+                            R = p;
+                            G = q;
+                            B = b;
+                            break;
+                        case 4:
+                            R = t;
+                            G = p;
+                            B = b;
+                            break;
+                        case 5:
+                            R = b;
+                            G = p;
+                            B = q;
+                            break;
+                    }
+                    R = R * 255;
+                    G = G * 255;
+                    B = B * 255;
+                }
+                return [Math.round(R), Math.round(G), Math.round(B)];
+            },
+            // RGB转HEX
+            rgb_hex: function (r, g, b) {
+                r = r < 16 ? '0' + r.toString(16) : r.toString(16);
+                g = g < 16 ? '0' + g.toString(16) : g.toString(16);
+                b = b < 16 ? '0' + b.toString(16) : b.toString(16);
+                return "#" + r + g + b;
+            },
+            // HEX转RGB
+            hex_rgb: function (hex) {
+                var hex = parseInt(((hex.indexOf('#') > -1) ? hex.substring(1) : hex), 16);
+                return [hex >> 16, (hex & 0x00FF00) >> 8, hex & 0x0000FF];
+            }
+        }
+    })
+</script>
+
+</html>
