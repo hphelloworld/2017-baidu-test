@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 	<title>动态数据绑定</title>
 	<meta charset="UTF-8" />
@@ -8,77 +9,77 @@
 <style>
 
 </style>
+
 <body>
 
 </body>
 <script type="text/javascript">
+	let o = Observer.prototype;
 
-
-let o=Observer.prototype;
-
-o.watch=function(obj){
-	let val;
-	// 遍历对象各个属性为其绑定getter和setter
-	for(let key in obj){
-		// for...in会把对象原型链上所有可枚举的属性循环出来，hasOwnProperty会筛选出对象本身拥有的属性
-		if(obj.hasOwnProperty(key)){
-			val=obj[key];
-			// 判断是否为对象
-			if(typeof val==='object'){
-				new Observer(val);
+	o.watch = function (obj) {
+		let val;
+		// 遍历对象各个属性为其绑定getter和setter
+		for (let key in obj) {
+			// for...in会把对象原型链上所有可枚举的属性循环出来，hasOwnProperty会筛选出对象本身拥有的属性
+			if (obj.hasOwnProperty(key)) {
+				val = obj[key];
+				// 判断是否为对象
+				if (typeof val === 'object') {
+					new Observer(val);
+				}
+				this.convert(key, val);
 			}
-			this.convert(key,val);
 		}
 	}
-}
 
-o.convert=function(key,val){
-	// 使用Object.defineProperty重新定义get和set方法
-	Object.defineProperty(this.data,key,{
-		enumerable: true,
-		configurable: true,
-		get: function(){
-			if(typeof val==='object') return val;
-			console.log('你访问了'+key);
-			return val
-		},
-		set: function(newval){
-			if(newval===val) return;
-			console.log('你设置了'+key+'为'+JSON.stringify(newval));
-			val=newval;
-			if(typeof newval==='object'){
-				new Observer(newval);
+	o.convert = function (key, val) {
+		// 使用Object.defineProperty重新定义get和set方法
+		Object.defineProperty(this.data, key, {
+			enumerable: true,
+			configurable: true,
+			get: function () {
+				if (typeof val === 'object') return val;
+				console.log('你访问了' + key);
+				return val
+			},
+			set: function (newval) {
+				if (newval === val) return;
+				console.log('你设置了' + key + '为' + JSON.stringify(newval));
+				val = newval;
+				if (typeof newval === 'object') {
+					new Observer(newval);
+				}
 			}
-		}
-	})
-}
+		})
+	}
 
 
-let data = {
-    user: {
-        name: "hp",
-        age: "24",
-        gender: "man"
-    },
-    book: '' 
-};
-let app = new Observer(data);
+	let data = {
+		user: {
+			name: "hp",
+			age: "24",
+			gender: "man"
+		},
+		book: ''
+	};
+	let app = new Observer(data);
 
-function Observer(data){
-	this.data=data;
-	this.watch(data);
-}
+	function Observer(data) {
+		this.data = data;
+		this.watch(data);
+	}
 
 
-data.user.age; //你访问了age
-data.user.name='30'; //你设置了name为30
-data.user.gender;// 你访问了gender
-data.book={           //你设置了book为{"js":"javascript","css":"css3","html":"html5"}
-	js: 'javascript',
-	css: 'css3',
-	html: 'html5'
-}
-data.book.js='es6' //你设置了js为"es6"
+	data.user.age; //你访问了age
+	data.user.name = '30'; //你设置了name为30
+	data.user.gender;// 你访问了gender
+	data.book = {           //你设置了book为{"js":"javascript","css":"css3","html":"html5"}
+		js: 'javascript',
+		css: 'css3',
+		html: 'html5'
+	}
+	data.book.js = 'es6' //你设置了js为"es6"
 
 </script>
+
 </html>
