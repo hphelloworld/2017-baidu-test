@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>动态数据绑定VUE</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+</head>
+<style>
+
+</style>
+
+<body>
+    <div id="app">
+        <div>{{user.name}}</div>
+        <div>{{user.age}}</div>
+    </div>
+</body>
+<script type="text/javascript">
+    function Vue(obj) {
+        var data = obj.data;
+        this.data = data;
+        this.el = obj.el;
+        this.update();
+        watch(data);
+        var _this = this;
+        // 为对象添加监控
+        function watch(data) {
+            // 循环绑定get与set方法
+            for (var key in data) {
+                if (data.hasOwnProperty(key)) {
+                    var val = data[key];
+                    // 判断是否为对象
+                    if (typeof val === 'object') {
+                        new watch(val);
+                    } else {
+                        bind(key, val);
+                    }
+                }
+            }
+            // 更改set与get;
+            function bind(key, val) {
+                Object.defineProperty(data, key, {
+                    enumerable: true,
+                    configurable: true,
+                    get: function () {
+                        return val;
+                    },
+                    set: function (newval) {
+                        if (newval === data[key]) return;
+                        val = newval;
+                        // 有值变化，更新dom
+                        _this.update();
+                    }
+                })
+            }
+        }
+    };
+    // dom更新操作
+    Vue.prototype.update = function () {
+        var _this = this;
+        var data = _this.data;
+        var el = document.querySelector(_this.el);
+        var _html = el.innerHTML.replace(/\{\{(.*)\}\}/g, mark);
+        el.innerHTML = _html;
+        // 模版差值替换
+        function mark(match, key) {
+            return '<vue data-bind-text="' + key + '"></vue>'
+        };
+        // 找到所有需要替换的值
+        var els = document.querySelectorAll("[data-bind-text]");
+        [].forEach.call(els, function (e) {
+            var attr = e.getAttribute('data-bind-text')
+            var attr_array = attr.split('.');
+            // 找到data里面对应的键值
+            var v = data[attr_array[0]];
+            for (var i = 1, l = attr_array.length; i < l; i++) {
+                v = v[attr_array[i]];
+            }
+            // 判断是否第一次渲染
+            if (e.nodeName == "VUE") {
+                var p = e.parentNode;
+                p.setAttribute("data-bind-text", attr);
+                p.innerHTML = p.innerHTML.replace(e.outerHTML, v);
+            } else {
+                e.innerHTML = v;
+            }
+        })
+    }
+
+    // 测试实例
+    var app = new Vue({
+        el: "#app",
+        data: {
+            user: {
+                name: 'huangpan',
+                age: 23
+            }
+        }
+    });
+    // 测试设置延迟更新数据
+    setTimeout(function () {
+        app.data.user.name = 'hh';
+    }, 2000);
+
+    // 测试设置延迟更新数据
+    setTimeout(function () {
+        app.data.user.age = '18';
+    }, 5000);
+
+</script>
+
+</html>
