@@ -41,11 +41,46 @@
 		})
 	}
 	// data-bind方法
-	function Observer(data) {
+	function Observer(data,dep) {
+		// this.parentstree = {};
+		// this.eventwatch = new Event();
 		this.data = data;
+		if(dep==undefined||dep==null){
+			this.$parents(data, []);
+		}
 		this.watch(data);
-		this.eventwatch = new Event();
 	}
+	// 事件管理
+	let event_run={
+		eventwatch: new Event(),
+		parentstree: {},
+		parents: function(data){
+			var o = {};
+			parents(data,[]);
+			return o;
+			function parents(data, arr) {
+				var arr = arr ? arr : [];
+				for (k in data) {
+					if (data.hasOwnProperty(k)) {
+						o[k] = [k];
+						for (var i = 0, l = arr.length; i < l; i++) {
+							o[k].push(arr[i]);
+						};
+						if (typeof data[k] === 'object') {
+							arr.unshift(k);
+							parents(data[k], arr);
+							arr = [];
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// function event_run(){
+	// 	this.eventwatch = new Event();
+	// }
+
 	// 添加监听
 	Observer.prototype.watch = function (obj) {
 		let val;
@@ -56,7 +91,7 @@
 				val = obj[key];
 				// 判断是否为对象
 				if (typeof val === 'object') {
-					new Observer(val);
+					new Observer(val,true);
 				}
 				this.setAndget(key, val);
 			}
@@ -65,6 +100,7 @@
 	// 添加监听set与get
 	Observer.prototype.setAndget = function (key, val) {
 		var _this = this;
+		let emit_key = event_run.parentstree[key];
 		// 使用Object.defineProperty重新定义get和set方法
 		Object.defineProperty(this.data, key, {
 			enumerable: true,
@@ -77,7 +113,9 @@
 			set: function (newval) {
 				if (newval === val) return;
 				console.log('你设置了' + key + '为' + JSON.stringify(newval));
-				_this.eventwatch.emit(key, val, newval);
+				for (var i = 0, l = emit_key.length; i < l; i++) {
+					event_run.eventwatch.emit(emit_key[i], val, newval);
+				}
 				val = newval;
 				if (typeof newval === 'object') {
 					new Observer(newval);
@@ -87,24 +125,46 @@
 	}
 	// 添加set事件监听回调
 	Observer.prototype.$watch = function (attr, callback) {
-		this.eventwatch.on(attr, callback);
+		event_run.eventwatch.on(attr, callback);
 	}
-
+	// 生成事件树形图
+	Observer.prototype.$parents = function (data) {
+		event_run.parentstree=event_run.parents(data);
+		// var arr = arr ? arr : [];
+		// for (let k in data) {
+		// 	if (data.hasOwnProperty(k)) {
+		// 		this.parentstree[k] = [k];
+		// 		for (let i = 0, l = arr.length; i < l; i++) {
+		// 			this.parentstree[k].push(arr[i]);
+		// 		};
+		// 		if (typeof data[k] === 'object') {
+		// 			arr.unshift(k);
+		// 			this.$parents(data[k], arr);
+		// 			arr = [];
+		// 		}
+		// 	}
+		// }
+	}
 
 	// 数据测试
 	let data = {
 		user: {
 			name: "hp",
 			age: "24",
-			gender: "man"
+			gender: "man",
+			other: {
+				height: '170',
+				weight: '100'
+			}
 		},
 		address: "wuhan",
 		book: ''
 	};
+	
 	// new一个实例
 	let app = new Observer(data);
 	// 添加事件监听
-	app.$watch('address', function (oldval, newval) {
+	app.$watch('js', function (oldval, newval) {
 		console.log(oldval + "更改为" + newval);
 	})
 	// 开始测试（后面注释为打印结果）
@@ -119,7 +179,7 @@
 	data.book.js; //你访问了js
 	data.book.js = 'es6' //你设置了js为"es6"
 	data.address = 'hubei' //wuhan更改为hubei
-
+	data.user.age = '20';
 </script>
 
 </html>
