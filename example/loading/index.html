@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>CSS3饼状loading效果</title>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	<link rel="stylesheet" type="text/css" href="../common/css/reset.css">
+</head>
+<style>
+	html,body{
+        width: 100%;
+        height: 100%;
+    }
+    .loading{
+        width: 100px;
+        height: 100px;
+        margin: 0 auto;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-left: -50px;
+        margin-top: -50px;
+        border: 1px solid #FF2413;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: rotate 1s linear infinite;
+    }
+    .loading+span{
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-left: -30px;
+        margin-top: -30px;
+        width: 60px;
+        height: 60px;
+        z-index: 10;
+    }
+    .loading+span i{
+        display: block;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        width: 0;
+        height: 0;
+        border-radius: 30px;
+        border: 30px solid;
+        border-bottom-color: #FF2413;
+        border-left-color: #FF2413;
+        border-top-color: #EC938C;
+        border-right-color: #EC938C;
+        z-index: 1;
+        transform: rotate(45deg);
+    }
+    .loading+span:before{
+        content: "";
+        position: absolute;
+        width: 0;
+        height: 0;
+        border-radius: 30px;
+        border: 30px solid #EC938C;
+        border-top-color: transparent;        
+        border-right-color: transparent;        
+        top: 0;
+        right: 0;
+        transform: rotate(45deg);
+        z-index: 10;
+        animation: spanbefore 2s linear infinite;
+    }
+    .loading+span:after{
+        content: "";
+        position: absolute;
+        width: 0;
+        height: 0;
+        border-radius: 30px;
+        border: 30px solid #FF2413;
+        border-top-color: transparent;        
+        border-right-color: transparent;        
+        top: 0;
+        left: 0;
+        transform: rotate(45deg);
+        z-index: 5;
+        animation: spanafter 2s 0.5s linear infinite;
+    }
+    @keyframes spanbefore {
+        from {transform: rotate(45deg);}
+        25%{transform: rotate(-135deg);}
+        50%{transform: rotate(-135deg);}
+        75%{transform: rotate(-315deg);}
+        to {transform: rotate(-315deg);}
+    }
+    @keyframes spanafter {
+        from {transform: rotate(45deg);z-index:10;}
+        25%{transform: rotate(-135deg);}
+        50%{transform: rotate(-135deg);z-index:10;}
+        50.001%{transform: rotate(-135deg);z-index:5;}
+        75%{transform: rotate(-315deg);z-index:5;}
+        99.999%{transform: rotate(-315deg);z-index:5;}
+        to {transform: rotate(-315deg);z-index:10;}
+    }
+    @keyframes rotate {
+        from {transform: rotate(0deg)}
+        to {transform: rotate(-360deg)}
+    }
+</style>
+<body>
+	<div class="loading">
+    </div>
+    <span><i></i></span>
+</body>
+</html>
