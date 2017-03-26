@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>巨型画布</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" type="text/css" href="../common/css/reset.css">
+</head>
+<style>
+    html,
+    body {
+        width: 100%;
+        height: 100%;
+        position: relative;
+    }
+    
+    .view_box {
+        width: 100%;
+        height: 100%;
+        position: relative;
+    }
+    
+    .hidden {
+        display: none!important;
+    }
+    
+    .preview {
+        position: absolute;
+        width: 200px;
+        top: 20px;
+        right: 20px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, .3);
+        min-height: 300px;
+        z-index: 10;
+    }
+    
+    .preview img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+        margin: 0 auto;
+    }
+    
+    .preview .box {
+        position: absolute;
+        width: 100px;
+        height: 70px;
+        border: 2px solid rgb(100%, 0%, 0%);
+        top: 0;
+        left: 50px;
+    }
+    
+    .upload {
+        text-align: center;
+        display: block;
+        cursor: pointer;
+        border: 1px solid #ccc;
+        height: 40px;
+        line-height: 40px;
+        border-radius: 4px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, .2);
+        width: 200px;
+        margin: 50px auto;
+    }
+    
+    canvas {
+        display: block;
+        position: relative;
+        top: 50%;
+        -webkit-transform: translateY(-50%);
+        -moz-transform: translateY(-50%);
+        -ms-transform: translateY(-50%);
+        -o-transform: translateY(-50%);
+        transform: translateY(-50%);
+        margin: 0 auto;
+        box-shadow: 0 0 3px rgba(0, 0, 0, .3);
+        cursor: move;
+    }
+</style>
+
+<body>
+    <div class="view_box hidden">
+        <div class="preview">
+            <img src="" alt="">
+            <span class="box"></span>
+        </div>
+        <canvas id="view" width="1000" height="700"></canvas>
+    </div>
+    <form action="">
+        <label class="upload">
+            请先选择一张图片开始
+            <input type="file" class="hidden uploadinput" multiple accept="image/*" >
+        </label>
+    </form>
+
+</body>
+<script src="../common/js/jquery.min.js"></script>
+<script>
+    var view = $("#view"); //画布
+    var ctx = view.get(0).getContext("2d"); 
+    var preview = $(".preview"); //右上角预览框
+    var img = $(".preview img"); // 小图
+    var box = $(".box"); //红框
+    var preview_w, preview_h; //小图预览宽高
+    var box_w, box_h; //红框宽高
+    var img_w, img_h; //图片宽高
+    var canvas_w, canvas_h; //画布宽高
+    var x, y; //图片裁剪坐标
+    var down_x, down_y; //鼠标按下时的坐标
+    var move_x, move_y; //鼠标移动时的坐标
+    var mousedown = false; //鼠标按下标示
+    var imgPosition; //画布图片实例
+
+    // 选择图片上传
+    $('.uploadinput').on('change', function () {
+        var src = getObjectURL(this.files[0]);
+        img.attr('src', src);
+        // 图片载入
+        img.get(0).onload = function () {
+            $(".upload").addClass('hidden');
+            $(".view_box").removeClass('hidden');
+            img_w = this.naturalWidth; //获取图片真实宽度
+            img_h = this.naturalHeight; //获取图片真实高度
+            canvas_w = view.width(); 
+            canvas_h = view.height();
+            //初始化图片裁剪坐标
+            x = (img_w - canvas_w) / 2;  
+            y = (img_h - canvas_h) / 2;
+            preview_w = preview.width();
+            preview_h = preview_w / img_w * img_h;
+            // 生成画布图片实例
+            imgPosition = new imgPosition(this, x, y);
+        }
+    })
+    // 画布鼠标按下事件
+    view.on('mousedown', function (e) {
+        e.stopPropagation();
+        down_x = e.offsetX;
+        down_y = e.offsetY;
+        mousedown = true;
+    })
+    // 画布鼠标移动事件
+    view.on('mousemove', function (e) {
+        if (!mousedown) return;
+        move_x = e.offsetX;
+        move_y = e.offsetY;
+        var _x = move_x - down_x;
+        var _y = move_y - down_y;
+        imgPosition.update(_x, _y);
+    })
+    // 鼠标弹起事件
+    $(document).on('mouseup', function () {
+        mousedown = false;
+        imgPosition.x = imgPosition.sx;
+        imgPosition.y = imgPosition.sy;
+    })
+
+    // 红框位置更新
+    function boxupdate(x, y) {
+        // x / (img_w - canvas_w)==left / (preview_w - box_w);
+        box_w = box.outerWidth();
+        box_h = box.outerHeight();
+        var left = x / (img_w - canvas_w) * (preview_w - box_w);
+        var top = y / (img_h - canvas_h) * (preview_h - box_h);
+        box.css({
+            left: left + 'px',
+            top: top + 'px'
+        })
+    }
+
+    // 画布图片方法
+    function imgPosition(img, x, y) {
+        this.img = img;
+        this.x = x;
+        this.y = y;
+        //sx,sy纪录图片移动时的裁剪坐标
+        this.sx = 0;
+        this.sy = 0;
+        this.update(this.sx, this.sy);
+    }
+
+    // 移动时图片位置更新
+    imgPosition.prototype.update = function (x, y) {
+        var ix = this.x - x > 0 ? this.x - x : 0;
+        var iy = this.y - y > 0 ? this.y - y : 0;
+        // 判断是否超出图片最小裁剪区域
+        if (ix > img_w - canvas_w) ix = img_w - canvas_w;
+        if (iy > img_h - canvas_h) iy = img_h - canvas_h;
+        this.sx = ix;
+        this.sy = iy;
+        ctx.clearRect(0, 0, canvas_w, canvas_h);
+        ctx.drawImage(this.img, ix, iy, canvas_w, canvas_h, 0, 0, canvas_w, canvas_h);
+        boxupdate(ix, iy)
+    }
+
+    // 获取上传文件路径
+    function getObjectURL(file) {
+        var url = null;
+        if (window.createObjectURL != undefined) {
+            url = window.createObjectURL(file)
+        } else if (window.URL != undefined) {
+            url = window.URL.createObjectURL(file)
+        } else if (window.webkitURL != undefined) {
+            url = window.webkitURL.createObjectURL(file)
+        }
+        return url
+    };
+
+</script>
+
+</html>
