@@ -193,7 +193,7 @@
         mousedown = false;
         imgPosition.x = imgPosition.sx;
         imgPosition.y = imgPosition.sy;
-        if(rect_down){
+        if (!rect_down) {
             for (var i = 0, l = rect_array.length; i < l; i++) {
                 rect_array[i].x = rect_array[i].px;
                 rect_array[i].y = rect_array[i].py;
