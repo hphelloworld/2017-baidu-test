@@ -143,9 +143,11 @@
     var down_x, down_y; //鼠标按下时的坐标
     var move_x, move_y; //鼠标移动时的坐标
     var mousedown = false; //鼠标按下标示
-    var rect_down = false;
+    var rect_down = false; //画框选中标示
+    var preview_down = false; //缩略图鼠标按下标示
     var imgPosition; //画布图片实例
-    var rect_array = [];
+    var previewbox; //缩略图红框实例
+    var rect_array = []; //画布中画框数组
 
     // 选择图片上传
     $('.uploadinput').on('change', function () {
@@ -155,7 +157,7 @@
         img.get(0).onload = function () {
             img_w = this.naturalWidth; //获取图片真实宽度
             img_h = this.naturalHeight; //获取图片真实高度
-            if(img_w<1000||img_h<700){
+            if (img_w < 1000 || img_h < 700) {
                 alert('您选取的图片尺寸太小了，换一张大的吧！（1000x700以上）');
                 return;
             }
@@ -163,6 +165,8 @@
             $(".view_box").removeClass('hidden');
             canvas_w = view.width();
             canvas_h = view.height();
+            box_w = box.outerWidth();
+            box_h = box.outerHeight();
             //初始化图片裁剪坐标
             x = (img_w - canvas_w) / 2;
             y = (img_h - canvas_h) / 2;
@@ -195,6 +199,7 @@
     // 鼠标弹起事件
     $(document).on('mouseup', function () {
         mousedown = false;
+        preview_down = false;
         imgPosition.x = imgPosition.sx;
         imgPosition.y = imgPosition.sy;
         if (!rect_down) {
@@ -214,6 +219,27 @@
             rect_down = true;
         }
     })
+    // 缩略图鼠标按下事件
+    $(".preview").on('mousedown', function (e) {
+        preview_down = true;
+        if (e.target.nodeName == 'SPAN') {
+            var dx = e.offsetX + e.target.offsetLeft;
+            var dy = e.offsetY + e.target.offsetTop;
+        } else {
+            var dx = e.offsetX;
+            var dy = e.offsetY;
+        }
+        previewbox.boxmove(dx, dy);
+    })
+    // 缩略图鼠标移动事件
+    $(".preview").on('mousemove', function (e) {
+        if (!preview_down) return;
+        if (e.target.nodeName == 'SPAN') {
+            var mx = e.offsetX + e.target.offsetLeft;
+            var my = e.offsetY + e.target.offsetTop;
+            previewbox.boxmove(mx, my)
+        }
+    })
 
     // 画框方法
     function drawRect(x, y) {
@@ -226,7 +252,7 @@
         this.width = 0;
         this.height = 0;
     }
-
+    // 画框
     drawRect.prototype.draw = function (w, h) {
         this.width = w;
         this.height = h;
@@ -237,17 +263,33 @@
         ctx.stroke();
     }
 
-    // 红框位置更新
-    function boxupdate(x, y) {
-        // x / (img_w - canvas_w)==left / (preview_w - box_w);
-        box_w = box.outerWidth();
-        box_h = box.outerHeight();
-        var left = x / (img_w - canvas_w) * (preview_w - box_w);
-        var top = y / (img_h - canvas_h) * (preview_h - box_h);
+    // 缩略图红框 
+    function previewbox(x, y) {
+        this.left = 0;
+        this.top = 0;
+        this.boxupdate(x, y);
+    }
+    // 缩略图红框位置更新
+    previewbox.prototype.boxupdate = function (x, y) {
+        this.left = x / (img_w - canvas_w) * (preview_w - box_w);
+        this.top = y / (img_h - canvas_h) * (preview_h - box_h);
         box.css({
-            left: left + 'px',
-            top: top + 'px'
+            left: this.left + 'px',
+            top: this.top + 'px'
         })
+    }
+
+    // 缩略图红框被拖动时的方法
+    previewbox.prototype.boxmove = function (x, y) {
+        var box_left = x - box_w / 2 > 0 ? x - box_w / 2 : 0;
+        var box_top = y - box_h / 2 > 0 ? y - box_h / 2 : 0;
+        if (box_left > preview_w - box_w) box_left = preview_w - box_w;
+        if (box_top > preview_h - box_h) box_top = preview_h - box_h;
+        var img_x = box_left / (preview_w - box_w) * (img_w - canvas_w);
+        var img_y = box_top / (preview_h - box_h) * (img_h - canvas_h);
+        imgPosition.x = img_x;
+        imgPosition.y = img_y;
+        imgPosition.update(0, 0);
     }
 
     // 画布图片方法
@@ -258,10 +300,11 @@
         //sx,sy纪录图片移动时的裁剪坐标
         this.sx = 0;
         this.sy = 0;
+        previewbox = new previewbox(x, y);
         this.update(this.sx, this.sy);
     }
 
-    // 移动时图片位置更新或者画矩形是画布更新
+    // 移动时图片位置更新或者画矩形时画布更新
     imgPosition.prototype.update = function (x, y) {
         ctx.clearRect(0, 0, canvas_w, canvas_h);
         // 判断是在移动画布，还是在画框
@@ -285,7 +328,7 @@
             this.sx = ix;
             this.sy = iy;
             ctx.drawImage(this.img, ix, iy, canvas_w, canvas_h, 0, 0, canvas_w, canvas_h);
-            boxupdate(ix, iy);
+            previewbox.boxupdate(ix, iy);
             for (var i = 0, l = rect_array.length; i < l; i++) {
                 // 计算移动距离
                 rect_array[i].sx -= x;
