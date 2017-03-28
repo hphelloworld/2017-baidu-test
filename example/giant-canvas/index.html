@@ -49,6 +49,7 @@
         border: 2px solid rgb(100%, 0%, 0%);
         top: 0;
         left: 50px;
+        cursor: pointer;
     }
     
     .upload {
@@ -124,7 +125,6 @@
             <input type="file" class="hidden uploadinput" multiple accept="image/*" >
         </label>
     </form>
-
 </body>
 <script src="../common/js/jquery.min.js"></script>
 <script>
@@ -153,10 +153,14 @@
         img.attr('src', src);
         // 图片载入
         img.get(0).onload = function () {
-            $(".upload").addClass('hidden');
-            $(".view_box").removeClass('hidden');
             img_w = this.naturalWidth; //获取图片真实宽度
             img_h = this.naturalHeight; //获取图片真实高度
+            if(img_w<1000||img_h<700){
+                alert('您选取的图片尺寸太小了，换一张大的吧！（1000x700以上）');
+                return;
+            }
+            $(".upload").addClass('hidden');
+            $(".view_box").removeClass('hidden');
             canvas_w = view.width();
             canvas_h = view.height();
             //初始化图片裁剪坐标
@@ -260,16 +264,19 @@
     // 移动时图片位置更新或者画矩形是画布更新
     imgPosition.prototype.update = function (x, y) {
         ctx.clearRect(0, 0, canvas_w, canvas_h);
+        // 判断是在移动画布，还是在画框
         if (rect_down) {
+            // 画框
             ctx.drawImage(this.img, this.x, this.y, canvas_w, canvas_h, 0, 0, canvas_w, canvas_h);
             for (var i = 0, l = rect_array.length; i < l; i++) {
                 if (i == l - 1) {
-                    rect_array[i].draw(x, y)
+                    rect_array[i].draw(x, y);
                 } else {
                     rect_array[i].draw(rect_array[i].width, rect_array[i].height);
                 }
             }
         } else {
+            // 移动画布
             var ix = this.x - x > 0 ? this.x - x : 0;
             var iy = this.y - y > 0 ? this.y - y : 0;
             // 判断是否超出图片最小裁剪区域
@@ -280,11 +287,17 @@
             ctx.drawImage(this.img, ix, iy, canvas_w, canvas_h, 0, 0, canvas_w, canvas_h);
             boxupdate(ix, iy);
             for (var i = 0, l = rect_array.length; i < l; i++) {
+                // 计算移动距离
                 rect_array[i].sx -= x;
                 rect_array[i].sy -= y;
+                // 判断图片是否超出边界
+                if (ix == 0 || ix == img_w - canvas_w) rect_array[i].sx = rect_array[i].x - rect_array[i].px;
+                if (iy == 0 || iy == img_h - canvas_h) rect_array[i].sy = rect_array[i].y - rect_array[i].py;
                 rect_array[i].draw(rect_array[i].width, rect_array[i].height);
+                // 记录移动的位置
                 rect_array[i].px = rect_array[i].x - rect_array[i].sx;
                 rect_array[i].py = rect_array[i].y - rect_array[i].sy;
+                // 清空移动距离
                 rect_array[i].sx = 0;
                 rect_array[i].sy = 0;
             }
@@ -304,7 +317,6 @@
         }
         return url
     };
-
 </script>
 
 </html>
