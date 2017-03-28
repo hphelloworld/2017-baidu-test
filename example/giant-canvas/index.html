@@ -198,29 +198,38 @@
     })
     // 鼠标弹起事件
     $(document).on('mouseup', function () {
-        mousedown = false;
-        preview_down = false;
-        imgPosition.x = imgPosition.sx;
-        imgPosition.y = imgPosition.sy;
-        if (!rect_down) {
+        if (preview_down) rect_down = true;
+        if (!rect_down || preview_down&&rect_down) {
             for (var i = 0, l = rect_array.length; i < l; i++) {
                 rect_array[i].x = rect_array[i].px;
                 rect_array[i].y = rect_array[i].py;
             }
         }
+        mousedown = false;
+        preview_down = false;
+        imgPosition.x = imgPosition.sx;
+        imgPosition.y = imgPosition.sy;
+        
     })
     // 画框按钮点击事件
     draw_rect.on('click', function () {
-        if (operate.hasClass('active')) {
-            operate.removeClass('active');
-            rect_down = false;
-        } else {
+        if (!rect_down) {
             operate.addClass('active');
-            rect_down = true;
+        } else {
+            operate.removeClass('active');
         }
+        rect_down = !rect_down;
+        // if (operate.hasClass('active')) {
+
+        //     rect_down = false;
+        // } else {
+        //     operate.addClass('active');
+        //     rect_down = true;
+        // }
     })
     // 缩略图鼠标按下事件
     $(".preview").on('mousedown', function (e) {
+        rect_down = false;
         preview_down = true;
         if (e.target.nodeName == 'SPAN') {
             var dx = e.offsetX + e.target.offsetLeft;
@@ -287,9 +296,7 @@
         if (box_top > preview_h - box_h) box_top = preview_h - box_h;
         var img_x = box_left / (preview_w - box_w) * (img_w - canvas_w);
         var img_y = box_top / (preview_h - box_h) * (img_h - canvas_h);
-        imgPosition.x = img_x;
-        imgPosition.y = img_y;
-        imgPosition.update(0, 0);
+        imgPosition.update(imgPosition.x - img_x, imgPosition.y - img_y);
     }
 
     // 画布图片方法
