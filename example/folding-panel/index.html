@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>CSS3饼状loading效果</title>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	<link rel="stylesheet" type="text/css" href="../common/css/reset.css">
+</head>
+<style>
+	html,body{
+        width: 100%;
+        height: 100%;
+    }
+    body{
+        padding: 20px;
+    }
+    .hidden{
+        display: none!important;
+    }
+    .panel_ul{
+        display: block;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        width: 200px;
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+    .panel_ul li label{
+        display: block;
+        cursor: pointer;
+    }
+    .panel_ul li label input:checked+.hide_div{
+        visibility: visible;
+        -webkit-transform: scale(1,1);
+        -moz-transform: scale(1,1);
+        -ms-transform: scale(1,1);
+        -o-transform: scale(1,1);
+        transform: scale(1,1);
+        opacity: 1;
+        height: auto;
+    }
+    .panel_ul li label p{
+        margin: 0;
+        color: #666;
+        height: 40px;
+        line-height: 40px;
+        padding: 0 10px;
+        border-bottom: 1px solid #ddd;
+    }
+    .panel_ul li  .hide_div{
+        height: 0;
+        padding: 0 10px 0 20px;
+        border-bottom: 1px solid #ddd;
+        -webkit-transition: all 0.3s;
+        -moz-transition: all 0.3s;
+        -ms-transition: all 0.3s;
+        -o-transition: all 0.3s;
+        transition: all 0.3s;
+        -webkit-transform: scale(1,0);
+        -moz-transform: scale(1,0);
+        -ms-transform: scale(1,0);
+        -o-transform: scale(1,0);
+        transform: scale(1,0);
+        -webkit-transform-origin: top center;
+        -moz-transform-origin: top center;
+        -ms-transform-origin: top center;
+        -o-transform-origin: top center;
+        transform-origin: top center;
+        visibility: hidden;
+        opacity: 0;
+    }
+    .panel_ul li:last-child .hide_div{
+        border: none;
+    }
+    .panel_ul li  .hide_div a{
+        display: block;
+        height: 30px;
+        line-height: 30px;
+        border-bottom: 1px solid #ddd;
+        color: #999;
+        font-size: 14px;
+        text-decoration: none;
+    }
+    .panel_ul li  .hide_div a:last-child{
+        border: none;
+    }
+</style>
+<body>
+    <ul class="panel_ul">
+        <li>
+            <label>
+                <p>分组1</p>
+                <input type="radio" name="panel" value="1" class="hidden">
+                <div class="hide_div">
+                    <a href="#">链接11</a>
+                    <a href="#">链接12</a>
+                    <a href="#">链接13</a>
+                    <a href="#">链接14</a>
+                    <a href="#">链接15</a>
+                </div>
+            </label>
+        </li>
+        <li>
+            <label>
+                <p>分组2</p>
+                <input type="radio" name="panel" value="2" class="hidden">
+                <div class="hide_div">
+                    <a href="#">链接21</a>
+                    <a href="#">链接22</a>
+                    <a href="#">链接23</a>
+                    <a href="#">链接24</a>
+                    <a href="#">链接25</a>
+                </div>
+            </label>
+        </li>
+        <li>
+            <label>
+                <p>分组3</p>
+                <input type="radio" name="panel" value="3" class="hidden">
+                <div class="hide_div">
+                    <a href="#">链接31</a>
+                    <a href="#">链接32</a>
+                    <a href="#">链接33</a>
+                    <a href="#">链接34</a>
+                    <a href="#">链接35</a>
+                </div>
+            </label>
+        </li>
+    </ul>
+</body>
+</html>
