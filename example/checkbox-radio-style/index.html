@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>自定义checkbox,radio样式</title>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	<link rel="stylesheet" type="text/css" href="../common/css/reset.css">
+</head>
+<style>
+	html,body{
+        width: 100%;
+        height: 100%;
+    }
+    .hidden{
+        display: none!important;
+    }
+    .list{
+        padding: 20px;
+    }
+    .checkbox label{
+        display: block;
+        height: 30px;
+        line-height: 30px;
+        position: relative;
+        padding-left: 35px;
+        margin: 5px 0;
+        cursor: pointer;
+    }
+    .checkbox label:after{
+        content: "";
+        position: absolute;
+        width: 30px;
+        height: 100%;
+        background: url("img/un_a.png") no-repeat center;
+        background-size: contain;
+        top: 0;
+        left: 0;
+    }
+    .checkbox input:checked+label:after{
+        background: url("img/on_a.png") no-repeat center;
+        background-size: contain;
+    }
+    .radio label{
+        display: block;
+        height: 30px;
+        line-height: 30px;
+        position: relative;
+        padding-left: 35px;
+        margin: 5px 0;
+        cursor: pointer;
+    }
+    .radio label:after{
+        content: "";
+        position: absolute;
+        width: 30px;
+        height: 100%;
+        background: url("img/un_check.png") no-repeat center;
+        background-size: contain;
+        top: 0;
+        left: 0;
+    }
+    .radio input:checked+label:after{
+        background: url("img/on_check.png") no-repeat center;
+        background-size: contain;
+    }
+</style>
+<body>
+	<div class="list">
+        <h4>自定义checkbox样式</h4>
+        <div class="checkbox"> 
+            <input type="checkbox" name="checkbox" id="checkbox1" class="hidden" value="1">
+            <label for="checkbox1">checkbox1</label>
+            <input type="checkbox" name="checkbox" id="checkbox2" class="hidden" value="2">
+            <label for="checkbox2">checkbox2</label>
+            <input type="checkbox" name="checkbox" id="checkbox3" class="hidden" value="3">
+            <label for="checkbox3">checkbox3</label>
+            <input type="checkbox" name="checkbox" id="checkbox4" class="hidden" value="4">
+            <label for="checkbox4">checkbox4</label>
+        </div>
+    </div>
+    <div class="list">
+        <h4>自定义radio样式</h4>
+        <div class="radio"> 
+            <input type="radio" name="radio" id="radio1" class="hidden" value="1">
+            <label for="radio1">radio1</label>
+            <input type="radio" name="radio" id="radio2" class="hidden" value="2">
+            <label for="radio2">radio2</label>
+            <input type="radio" name="radio" id="radio3" class="hidden" value="3">
+            <label for="radio3">radio3</label>
+            <input type="radio" name="radio" id="radio4" class="hidden" value="4">
+            <label for="radio4">radio4</label>
+        </div>
+    </div>
+</body>
+</html>
